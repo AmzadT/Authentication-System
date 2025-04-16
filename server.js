@@ -2,14 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const Connection = require('./Config/db');
 const userRouter = require('./Routes/user.route');
-const authMiddleware = require('./Middlewares/auth.middleware');
-const Validate = require('./Middlewares/validate.middleware');
 const app = express();
 const PORT = process.env.PORT || 3005;
 
 // Middleware to parse JSON request bodies
 app.use(express.json())
-app.use('/user', [authMiddleware, Validate], userRouter);
+app.use('/api/user', userRouter);
 
 // Homepage route
 app.get('/', (req, res)=>{

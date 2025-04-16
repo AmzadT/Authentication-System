@@ -1,10 +1,12 @@
 const express = require('express');
 const userModel = require('../Models/user.model');
+const authMiddleware = require('../Middlewares/auth.middleware');
+const validate = require('../Middlewares/validate.middleware');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userRouter = express.Router();
 
-userRouter.post('/register', async (req, res) => {
+userRouter.post('/register',validate, async (req, res) => {
     const { name, email, password } = req.body;
   try {
     let user = await userModel.findOne({ email });
@@ -21,7 +23,7 @@ userRouter.post('/register', async (req, res) => {
   }
 })
 
-userRouter.post('/login', async (req, res) => {
+userRouter.post('/login',validate, async (req, res) => {
     const { email, password } = req.body;
   try {
     const user = await userModel.findOne({ email });
@@ -38,8 +40,10 @@ userRouter.post('/login', async (req, res) => {
   }
 })
 
-userRouter.post('/reset-password', async (req, res) => {
-    const { email, newPassword } = req.body;
+userRouter.post('/reset-password', [authMiddleware, validate], async (req, res) => {
+  const { newPassword } = req.body;
+  const email = req.user.email;
+
   try {
     const user = await userModel.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -53,5 +57,6 @@ userRouter.post('/reset-password', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 module.exports = userRouter
